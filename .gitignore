@@ -1,0 +1,21 @@
+# Eclipse
+.classpath
+.project
+.settings/
+*.launch
+.apt_generated/
+
+# Java build
+bin/
+out/
+
+# Maven
+target/
+
+# Gradle
+.gradle/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
