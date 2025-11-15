@@ -17,6 +17,7 @@ import javafx.scene.layout.Pane;
 public class Jeu {
 	private String JEUX = "Assets/donnees/";
 	private enum difficulté {facile, moyen, difficile};
+	private Voiture voitureSelectionnee = null;
 	ArrayList<Voiture> lstVoitures = new ArrayList<Voiture>();
 	
 	public Jeu(String difficulte) {
@@ -46,7 +47,9 @@ public class Jeu {
 		}
 	}
 	
-	
+	public Voiture getVoitureSelectionnee() {
+		return this.voitureSelectionnee;
+	}
 	
 	// Méthodes
 	public void afficheVoitures(Pane panneau) {
@@ -60,6 +63,10 @@ public class Jeu {
 			panneau.getChildren().add(imgV);
 			//System.out.println(vtr);
 			
+			imgV.setOnMouseClicked(event ->{
+				voitureSelectionnee = vtr;
+				imgV.requestFocus();
+			});
 			imgV.setOnMouseClicked(event ->{
 				
 				Thread t = new Thread(()->{
@@ -93,7 +100,9 @@ public class Jeu {
 					//System.out.println(e.getCode());
 					vtr.seDeplacer(direction, imgV);
 				});
-				
+				// J'enleve le focusTraversable à ma voiture afin d'assurer que seulement CETTE voiture soit en mesure de se déplacer, car 
+				// chacune d'elles possède un thread, et une voiture quelconce pourrait se déplacer si je ne fais pas cela.
+				imgV.setFocusTraversable(false);
 			});
 			
 		}

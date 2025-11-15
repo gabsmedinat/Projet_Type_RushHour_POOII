@@ -120,7 +120,8 @@ public class Voiture implements Runnable{
 		return coordonneeX;
 	}
 	
-	public void seDeplacer(String direction, ImageView imgV) {
+	public synchronized void seDeplacer(String direction, ImageView imgV) {
+		
 		if(this.orientation.equals("H")) {
 			// Code pour les voitures horizontales
 			System.out.println("Votre voiture peut se déplacer vers la droite ou vers la gauche");
@@ -251,8 +252,9 @@ public class Voiture implements Runnable{
 				
 				t.start();
 			}
+			
 		}
-
+		
 	}
 	
 	@Override
@@ -262,13 +264,16 @@ public class Voiture implements Runnable{
 
 	public void start() {
 		Thread thread = new Thread(this);
+		System.out.println("Thread No."+thread.getId()+" en cours");
+
 		thread.start();
 	}
 
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		
+		System.out.println("Thread No."+" en cours");
+
 	}
 	
 }
