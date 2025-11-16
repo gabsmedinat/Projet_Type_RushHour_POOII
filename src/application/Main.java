@@ -213,13 +213,16 @@ public class Main extends Application {
 		btnReinit.setBorder(new Border(bdStroke));
 		btnReinit.setPadding(new Insets(5,15,5,15));
 		
+		btnReinit.setOnMouseClicked(event ->{
+			temps.arreterChronometre();
+		});
+		
 		btnMenu.setBorder(new Border(bdStroke));
 		btnMenu.setPadding(new Insets(5,15,5,15));
 		
-		
-		
 		btnMenu.setOnMouseClicked(event -> {
 			System.out.println("Type : "+event.getEventType());
+			temps.arreterChronometre();
 			scene.setRoot(root);
 			creerMenuPrincipal();
 			configurerMenuPrincipal();

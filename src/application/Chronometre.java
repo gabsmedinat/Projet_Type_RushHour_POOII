@@ -11,6 +11,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 
 public class Chronometre implements Runnable {
+	boolean chronometreActif = false;
 	String instant = "00:00";
 	Label chronometre = new Label(instant);
 	BorderStroke bdStroke;
@@ -21,7 +22,7 @@ public class Chronometre implements Runnable {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		while(true) {
+		while(chronometreActif) {
 			secondes ++;
 			if(secondes == 60) {
 				minutes ++;
@@ -45,13 +46,18 @@ public class Chronometre implements Runnable {
 		chronometre.setBorder(new Border(bdStroke));
 		chronometre.setPadding(new Insets(5,15,5,15));
 	
-
+		chronometreActif = true;
 		Thread t = new Thread(this);
 		t.start();
+		
 	}
 	
+	public void arreterChronometre() {
+		chronometreActif = false;
+		instant = "00:00";
+	}
 	
-	  public Label getLabel() {
-	        return chronometre;
-	    }
+	public Label getLabel() {
+	      return chronometre;
+	  }
 }
