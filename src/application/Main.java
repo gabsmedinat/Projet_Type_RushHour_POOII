@@ -23,10 +23,8 @@ import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
@@ -164,7 +162,6 @@ public class Main extends Application {
 		grilleJeu = new BorderPane();
 		
 		lblTemps = new Label("00:00");
-		lblCoups = new Label("0");
 		btnReinit = new Label("Réinitialiser");
 		btnMenu = new Label("Retour au menu");
 		
@@ -174,6 +171,7 @@ public class Main extends Application {
 		scene.setRoot(hBox2);
 
 		game = new Jeu(difficulte);
+		lblCoups = new Label(game.getCoups());
 		
 		imgGrille = new Image(getClass().getResource("/images/grille.gif").toString());
 		grille = new ImageView(imgGrille);

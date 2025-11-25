@@ -4,71 +4,114 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
-
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 
+/**
+ * Classe qui représente le Jeu. Elle place les objets Voiture au bon endroit de la grille selon le niveau 
+ * de difficulté choisi. 
+ * @author Gabme
+ */
+
 public class Jeu {
+	private Integer nbrCoups;
 	private String JEUX = "Assets/donnees/";
 	private enum difficulté {facile, moyen, difficile};
-	private Voiture voitureSelectionnee = null;
+	Voiture voitureSelectionnee = null;
 	ArrayList<Voiture> lstVoitures = new ArrayList<Voiture>();
+	private boolean setSystemeCollisions = false;
 	
+	/** 
+	 * Constructeur de classe Jeu. Une fois que la difficulté de Jeu est choisie, le constructeur s'occupe de chercher les fichiers 
+	 * correspondants, il initialise le nombre de placements faits à zero, et il créé des instances d'objet Voiture qui sont ensuite 
+	 * ajoutées à une collection de voitures.
+	 * @param Difficulté La difficulté du jeu selon trois types  */
 	public Jeu(String difficulte) {
-		String informationsJeu = "";
+		nbrCoups = 0;
+		
+		/* Lecture du fichier */
 		try {
 			String ligne;
 			FileReader fReader = new FileReader(this.JEUX+difficulte+".txt");
 			BufferedReader br = new BufferedReader(fReader);
 			
 			try {
+				/* Chaque ligne représente un objet Voiture. Séparation des paramètres pour ensuite creer instance de Voiture. */
 				while((ligne = br.readLine()) != null) {
 					String elements[] = ligne.split(",");
-					String couleur = elements[0];
-					int taille = Integer.parseInt(elements[1]);
-					int colonne = Integer.parseInt(elements[2]);
-					int lin = Integer.parseInt(elements[3]);
-					String orientation = elements[4];
-					lstVoitures.add(new Voiture(couleur,taille,colonne,lin,orientation));
+					String couleurVTR = elements[0];
+					int tailleVTR = Integer.parseInt(elements[1]);
+					int colonneVTR = Integer.parseInt(elements[2]);
+					int linVTR = Integer.parseInt(elements[3]);
+					String orientationVTR = elements[4];
+					lstVoitures.add(new Voiture(couleurVTR,tailleVTR,colonneVTR,linVTR,orientationVTR));
 				}
+				
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	public Voiture getVoitureSelectionnee() {
-		return this.voitureSelectionnee;
+	
+	/**
+	 * Retour du nombre de deplacements faits dans le jeu.
+	 * @return nbrCoups
+	 */
+	public String getCoups() {
+		return this.nbrCoups.toString();
 	}
 	
-	// Méthodes
+	/**
+	 * 
+	 * @param coup le numéro de deplacements
+	 */
+	public void setCoups(Integer coup) {
+		nbrCoups = coup;
+	}
+	
+	/**
+	 * Méthode qui arme la partie visuelle de la voiture pour la placer dans la grille.
+	 * @param panneau Panneau (Pane) qui sera affecté
+	 */
 	public void afficheVoitures(Pane panneau) {
 		Iterator<Voiture> it = lstVoitures.iterator();
 		while(it.hasNext()) {
-			Voiture vtr = it.next();
-			Image img = vtr.getImgVoiture();
+			Voiture vtr = it.next();     					// Itération en cours
+			Image img = vtr.getImgVoiture();               	
 			ImageView imgV = new ImageView(img);
-			imgV.setLayoutX(vtr.getX());
-			imgV.setLayoutY(vtr.getY());
-			panneau.getChildren().add(imgV);
-			//System.out.println(vtr);
 			
+			// Faire que le coin supérieur gauche de l'image (origine locale de l'image) soit placé dans les cordonnées 
+			// obtenues du fichier 
+			imgV.setLayoutX(vtr.getX());					
+			imgV.setLayoutY(vtr.getY());					
+			
+			
+			/* Préparation des conditions nécessaires pour le système de collisions. Chaque Voiture recoit un ID
+			 * en fonction de sa place dans l'Array du Jeu. */
+			
+			Integer ID = lstVoitures.indexOf(vtr);
+			vtr.setID(ID.toString());
+			
+			/* Utilisation des dimensions de l'ImageView de l'objet Voiture. */
+//			vtr.setBounds(imgV.getBoundsInParent());   
+			panneau.getChildren().add(imgV);
+			vtr.setBounds(imgV);
+						
+			
+			/* RequestFocus pour l'objet Voiture lorsque cliqué + animation courte */
 			imgV.setOnMouseClicked(event ->{
 				voitureSelectionnee = vtr;
 				imgV.requestFocus();
-			});
-			imgV.setOnMouseClicked(event ->{
+				System.out.println("Vous avez selectionné "+vtr.getID());   // TODO Indicateur pour debug
 				
+				/*  Animation   */
 				Thread t = new Thread(()->{
 					Platform.runLater(()->{
 						imgV.setScaleX(1.1);
@@ -80,7 +123,6 @@ public class Jeu {
 					try {
 						Thread.sleep(500);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					
@@ -92,21 +134,58 @@ public class Jeu {
 										
 				});
 				t.start();
-				imgV.setFocusTraversable(true);
+				
+				
+				/* Saisie de FocusTraversable à l'objet Voiture choisi et seulement à lui. Cela est fait 
+				 * avec le but d'empecher le reste des instances Voiture de se déplacer lorsque je clique à une nouvelle Voiture
+				 * Le résultat de ne pas faire cela serait donner la possibilité à plusieurs Voitures de se déplacer en même temps
+				 * avec la commande du clavier (condition de course ou "racing confition").*/
+				imgV.setFocusTraversable(true);   
 				imgV.requestFocus();
+				
+								
 				
 				imgV.setOnKeyPressed(e->{
 					String direction = e.getCode().toString();
-					//System.out.println(e.getCode());
-					vtr.seDeplacer(direction, imgV);
+					vtr.seDeplacer(direction, imgV, lstVoitures);
+					
 				});
-				// J'enleve le focusTraversable à ma voiture afin d'assurer que seulement CETTE voiture soit en mesure de se déplacer, car 
-				// chacune d'elles possède un thread, et une voiture quelconce pourrait se déplacer si je ne fais pas cela.
+				
+				/* Une fois l'action accomplie, FocusTraversable devient False pour limiter la mouvement à un seul Objet Voiture à la fois */
 				imgV.setFocusTraversable(false);
 			});
 			
 		}
 	}
 	
-
+	
+													// TODO : UTILISER LES DEUX MÉTHODES CRÉÉS ICI
+	public void activerSystemeCollisions() {
+		setSystemeCollisions = true;
+		
+		Thread threadCollisions = new Thread(()->{
+			while(setSystemeCollisions) {
+				try {
+					Thread.sleep(50);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				Platform.runLater(() -> {
+	                for (Voiture vtr : lstVoitures) {
+	                    for (int i = 0; i < lstVoitures.size(); i++) {
+	                        Voiture autreVoiture = lstVoitures.get(i);
+	                        if (vtr != autreVoiture && vtr.getBounds().intersects(autreVoiture.getBounds())) {
+	                            System.out.println(vtr.getID() + " intercepte " + autreVoiture.getID());
+	                        }
+	                    }
+	                }
+	            });
+			}
+		});
+		threadCollisions.start();
+	}
+	
+	public void desactiverSystemeCollisions() {
+		setSystemeCollisions = false;
+	}
 }

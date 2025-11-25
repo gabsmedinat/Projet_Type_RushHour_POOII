@@ -10,27 +10,35 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 
+/**
+ * Classe qui représente le temps écoulé entre le début du jeu et le moment actuel. Il implémente un Runnable afin de jouer le
+ * rôle de chronomètre sans ralentir ni interrompre le déroulement du jeu.
+ * @author Gabme
+ */
 public class Chronometre implements Runnable {
 	boolean chronometreActif = false;
 	String instant = "00:00";
 	Label chronometre = new Label(instant);
-	BorderStroke bdStroke;
 	
 	int secondes = 0;
 	int minutes = 0;
 
+	BorderStroke bdStroke;
+
+	/**
+	 * Exécution du programme en continu. Arrêt sécuritaire du thread à l'aide d'un booléen de contrôle et une bouble while.
+	 */
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
 		while(chronometreActif) {
 			secondes ++;
 			if(secondes == 60) {
 				minutes ++;
 				secondes = 0;
 			}
-			instant = String.format("%02d:%02d",minutes,secondes);
+			instant = String.format("%02d:%02d",minutes,secondes); 
 			Platform.runLater(() -> chronometre.setText(instant));
-			System.out.println(instant);
+			//System.out.println(instant);
 			try {
 				Thread.sleep(1000);
 			} catch (Exception e) {
@@ -41,6 +49,9 @@ public class Chronometre implements Runnable {
 		
 	}
 	
+	/**
+	 * Mise en forme du chronomètre. Ensuite, démarrage d'un thread portant l'objet Chronomètre comme argument.
+	 */
 	public void start() {
 		bdStroke = new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID,new CornerRadii(5), new BorderWidths(2.0) );
 		chronometre.setBorder(new Border(bdStroke));
@@ -52,11 +63,18 @@ public class Chronometre implements Runnable {
 		
 	}
 	
+	/**
+	 * Méthode destinée à changer l'état du booléen de contrôle pour le thread du chronomètre. 
+	 */
 	public void arreterChronometre() {
 		chronometreActif = false;
 		instant = "00:00";
 	}
 	
+	/**
+	 * Getter d'étiquette d'affichage du chronomètre.
+	 * @return
+	 */
 	public Label getLabel() {
 	      return chronometre;
 	  }
