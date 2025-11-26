@@ -1,6 +1,6 @@
 # Eclipse
-.classpath
-.project
+#.classpath
+#.project
 .settings/
 *.launch
 .apt_generated/
