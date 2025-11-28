@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javafx.application.Platform;
+import javafx.geometry.BoundingBox;
+import javafx.geometry.Point2D;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -24,6 +28,8 @@ public class Jeu {
 	Voiture voitureSelectionnee = null;
 	ArrayList<Voiture> lstVoitures = new ArrayList<Voiture>();
 	private boolean setSystemeCollisions = false;
+	private Point2D pointBut = new  Point2D(500,250);
+	
 	
 	/** 
 	 * Constructeur de classe Jeu. Une fois que la difficulté de Jeu est choisie, le constructeur s'occupe de chercher les fichiers 
@@ -103,13 +109,14 @@ public class Jeu {
 //			vtr.setBounds(imgV.getBoundsInParent());   
 			panneau.getChildren().add(imgV);
 			vtr.setBounds(imgV);
+			System.out.println("Voiture : "+vtr.getID()+" - Bounds: "+ vtr.getBounds());
 						
 			
 			/* RequestFocus pour l'objet Voiture lorsque cliqué + animation courte */
 			imgV.setOnMouseClicked(event ->{
 				voitureSelectionnee = vtr;
 				imgV.requestFocus();
-				System.out.println("Vous avez selectionné "+vtr.getID());   // TODO Indicateur pour debug
+				System.out.println("Vous avez selectionné "+vtr.getID()+" - Bounds: "+ vtr.getBounds());   // TODO Indicateur pour debug
 				
 				/*  Animation   */
 				Thread t = new Thread(()->{
@@ -148,44 +155,22 @@ public class Jeu {
 				imgV.setOnKeyPressed(e->{
 					String direction = e.getCode().toString();
 					vtr.seDeplacer(direction, imgV, lstVoitures);
-					
-				});
+					if(vtr.getBounds().intersects(pointBut.getX(),pointBut.getY(),1,1)) {
+						System.out.println("Voilà");
+						Alert joueurGagne = new Alert(AlertType.INFORMATION);
+						joueurGagne.setHeaderText("Vous avez gagné!");
+						joueurGagne.setContentText("Vous avez gagné ");
+						joueurGagne.showAndWait();
+					}					
+				}); 
 				
 				/* Une fois l'action accomplie, FocusTraversable devient False pour limiter la mouvement à un seul Objet Voiture à la fois */
 				imgV.setFocusTraversable(false);
+				
 			});
 			
 		}
 	}
 	
 	
-													// TODO : UTILISER LES DEUX MÉTHODES CRÉÉS ICI
-	public void activerSystemeCollisions() {
-		setSystemeCollisions = true;
-		
-		Thread threadCollisions = new Thread(()->{
-			while(setSystemeCollisions) {
-				try {
-					Thread.sleep(50);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				Platform.runLater(() -> {
-	                for (Voiture vtr : lstVoitures) {
-	                    for (int i = 0; i < lstVoitures.size(); i++) {
-	                        Voiture autreVoiture = lstVoitures.get(i);
-	                        if (vtr != autreVoiture && vtr.getBounds().intersects(autreVoiture.getBounds())) {
-	                            System.out.println(vtr.getID() + " intercepte " + autreVoiture.getID());
-	                        }
-	                    }
-	                }
-	            });
-			}
-		});
-		threadCollisions.start();
-	}
-	
-	public void desactiverSystemeCollisions() {
-		setSystemeCollisions = false;
-	}
 }

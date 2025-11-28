@@ -65,7 +65,6 @@ public class Main extends Application {
 	Image imgGrille;
 	ImageView grille;
 	
-
 	
 	@Override
 	public void start(Stage primaryStage) {

@@ -3,10 +3,12 @@ package application;
 import java.util.ArrayList;
 
 import javafx.application.Platform;
+import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.geometry.Point2D;
 
 
 /**
@@ -14,6 +16,8 @@ import javafx.scene.image.ImageView;
  * @author Gabme
  */
 public class Voiture implements Runnable{
+	private Double CASE = 58.3;     // Dimensions de chaque case de la grille ( CASE * CASE) ~ environ
+	private int BORDS = 13;
 	private String idVoiture;  
 	private String couleur;
 	private String orientation;
@@ -59,6 +63,7 @@ public class Voiture implements Runnable{
 	 * @return idVoiture
 	 */
 	public String getID() {
+		
 		return this.idVoiture;
 	}
 	
@@ -212,7 +217,7 @@ public class Voiture implements Runnable{
 	 * @return coordonnéeX
 	 */
 	public Double getX() {
-		Double coordonneeX = this.colOrigine*(58.3+13)+52;   
+		Double coordonneeX = this.colOrigine*(CASE+BORDS)+52;   
 		return coordonneeX;
 	}
 	
@@ -222,8 +227,59 @@ public class Voiture implements Runnable{
 	 * @return coordonnéeX
 	 */
 	public Double getY() {
-		Double coordonneeX = this.linOrigine*(58.3+13)+75;
+		Double coordonneeX = this.linOrigine*(CASE+BORDS)+75;
 		return coordonneeX;
+	}
+	
+	//Pointeur: Il trace un point dynamique durant le deplacement du véhicule. Une fois en arrêt, le pointeur sera effacé.
+	// Fonctionnement: La variable pointDirecteur obtiendra ses coordonnées à l'aide de l'Orientation + la direction du mouvement. 
+	// Alors, une fois le deplacement commence, un point sera tracé à ~15px en dehors et en direction du déplacement, et: Si le point n'intersecte
+	// aucune voiture, ca veut dire qu'il peut se déplacer à cette case. Sinon, mouvement interdit.
+	public Point2D genererPointeur(String direction, String orientation) {
+		if(orientation.equals("V")) {
+			if(direction.equals("UP")) {
+				Point2D pointDirecteur = new Point2D(this.getX()+(CASE/2),this.getY()-(CASE/2));
+				System.out.println(String.format("Point généré à (%S,%S)",pointDirecteur.getX(),pointDirecteur.getY()));
+				return  pointDirecteur;
+			}
+			else if(direction.equals("DOWN")) {
+				Point2D pointDirecteur = new Point2D(this.getX()+(CASE/2),this.getY()+(taille+0.5)*CASE+(taille*BORDS));
+				System.out.println(String.format("Point généré à (%S,%S)",pointDirecteur.getX(),pointDirecteur.getY()));
+				return  pointDirecteur;
+			}
+			else {
+				System.out.println("orientation V ...pourtant nous sommes dans l'else");
+				return new Point2D(0,0);
+			}
+		}else if(orientation.equals("H")) {
+			if(direction.equals("LEFT")) {
+				Point2D pointDirecteur = new Point2D(this.getX()-(CASE/2),this.getY()+(CASE/2));
+				System.out.println(String.format("Point généré à (%S,%S)",pointDirecteur.getX(),pointDirecteur.getY()));
+				return  pointDirecteur;
+			}else if (direction.equals("RIGHT")) {
+				Point2D pointDirecteur = new Point2D(this.getX()+(taille+0.5)*CASE+(taille*BORDS),this.getY()+(CASE/2));
+				System.out.println(String.format("Point généré à (%S,%S)",pointDirecteur.getX(),pointDirecteur.getY()));
+				return  pointDirecteur;
+			}else {
+				System.out.println("orientation H ...pourtant nous sommes dans l'else");
+				return new Point2D (0,0);
+			}
+		}else {
+			return new Point2D(0,0);
+		}
+	
+	}
+	
+	// Si le point detecte une voiture, la méthode retourne vrai
+	public boolean detectionCollision(BoundingBox point, ArrayList<Voiture> lstVTR) {
+		boolean detection = false;
+		for(Voiture v : lstVTR) {
+			if(point.intersects(v.getBounds())&&!this.getBounds().intersects(point)) {
+				System.out.println(String.format("Voiture (%S) détectée ", v.getID()));
+				detection = true;
+			}
+		}
+		return detection;
 	}
 	
 	/**
@@ -233,141 +289,152 @@ public class Voiture implements Runnable{
 	 * @param lstVTR
 	 */
 	public synchronized void seDeplacer(String direction, ImageView imgV, ArrayList<Voiture> lstVTR) {
-		
-		if(this.orientation.equals("H")) {
-			// Code pour les voitures horizontales
-			//System.out.println("Votre voiture peut se déplacer vers la droite ou vers la gauche");
-			if(direction.equals("RIGHT")) {
-				//System.out.println("->");
-				Thread t = new Thread(()->{
-					double startX = imgV.getLayoutX();
-	                double endX = startX + 58.3 + 13; // Distance à se déplacer (58.3 c'est la longueur de chaque casse + 13px des bords)
-	                double i = startX;
-
-	                while (i < endX) {
-
-	                    double pos = i; 
-
-	                    Platform.runLater(() -> {
-	                        imgV.setLayoutX(pos);
-	                        	                        
-	                    });
-
-	                    i += 0.8; 
-
-	                    try {
-	                        Thread.sleep(5); 
-	                    } catch (InterruptedException e) {
-	                        e.printStackTrace();
-	                    }
-	                }
-
-	                Platform.runLater(() -> imgV.setLayoutX(endX));
-
-	            });
+		Point2D pointDirecteur = genererPointeur(direction,orientation);													//TODO: PLACER ICI LA FONCTION (PEUT-ÊTRE)
+		BoundingBox pointDansGrille = new BoundingBox(genererPointeur(direction,orientation).getX(),genererPointeur(direction,orientation).getY(),1,1);
+		if(detectionCollision(pointDansGrille,lstVTR)) {
+			System.out.println("Semble marcher");
+		}else {
+			if(this.orientation.equals("H")) {
+				// Code pour les voitures horizontales
+				//System.out.println("Votre voiture peut se déplacer vers la droite ou vers la gauche");
+				if(direction.equals("RIGHT")) {
+					//System.out.println("->");
+					Thread t = new Thread(()->{
+						double startX = imgV.getLayoutX();
+		                double endX = startX + CASE + BORDS; // Distance à se déplacer (**58.3 c'est la longueur de chaque casse + 13px des bords)
+		                double i = startX;
+	
+		                while (i < endX) {
+		                    double pos = i; 
+		                    Platform.runLater(() -> {
+		                        imgV.setLayoutX(pos); 
+		                    });
+		                    i += 0.8; 
+		                    
+		                    try {
+		                        Thread.sleep(5); 
+		                    } catch (InterruptedException e) {
+		                        e.printStackTrace();
+		                    }
+		                }
+	
+		                Platform.runLater(() ->{
+		                	imgV.setLayoutX(endX);
+	                        this.colOrigine++;
+					});
+	
+		            });
+						
 					
-				
-				t.start();
-			}
-			if(direction.equals("LEFT")) {
-				//System.out.println("<-");
-				Thread t = new Thread(()->{
-					double startX = imgV.getLayoutX();
-	                double endX = startX - 58.3 - 13; // Distance à se déplacer (58.3 c'est la longueur de chaque casse + 13px des bords)
-	                double i = startX;
-
-	                while (endX < i) {
-
-	                    double pos = i; 
-
-	                    Platform.runLater(() -> {
-	                        imgV.setLayoutX(pos);
-	                    });
-
-	                    i -= 0.8; 
-
-	                    try {
-	                        Thread.sleep(5); 
-	                    } catch (InterruptedException e) {
-	                        e.printStackTrace();
-	                    }
-	                }
-
-	                Platform.runLater(() -> imgV.setLayoutX(endX));
-
-	            });
+					t.start();
+				}
+				if(direction.equals("LEFT")) {
+					Thread t = new Thread(()->{
+						double startX = imgV.getLayoutX();
+		                double endX = startX - CASE - BORDS; 
+		                double i = startX;
+	
+		                while (endX < i) {
+	
+		                    double pos = i; 
+	
+		                    Platform.runLater(() -> {
+		                        imgV.setLayoutX(pos);
+		                    });
+	
+		                    i -= 0.8; 
+	
+		                    try {
+		                        Thread.sleep(5); 
+		                    } catch (InterruptedException e) {
+		                        e.printStackTrace();
+		                    }
+		                }
+	
+		                Platform.runLater(() ->{
+		                	imgV.setLayoutX(endX);
+		                	this.colOrigine--;
+		                });
+	
+		            });
+						
 					
-				
-				t.start();
-			}
-		}else { // SI Orientation Verticale
-			// Code pour les voitures Verticales 
-			//System.out.println("Votre voiture peut se déplacer vers le haut ou vers le bas");
-			if(direction.equals("UP")) {
-				//System.out.println("^");
-				Thread t = new Thread(()->{
-					double startY = imgV.getLayoutY();
-	                double endY = startY - 58.3 - 13; // Distance à se déplacer (58.3 c'est la longueur de chaque casse + 13px des bords)
-	                double i = startY;
-
-	                while (endY < i) {
-
-	                    double pos = i; 
-
-	                    Platform.runLater(() -> {
-	                        imgV.setLayoutY(pos);
-	                    });
-
-	                    i -= 0.8; 
-
-	                    try {
-	                        Thread.sleep(5); 
-	                    } catch (InterruptedException e) {
-	                        e.printStackTrace();
-	                    }
-	                }
-
-	                Platform.runLater(() -> imgV.setLayoutY(endY));
-
-	            });
+					t.start();
+				}
+			}else { // SI Orientation Verticale
+				// Code pour les voitures Verticales 
+				//System.out.println("Votre voiture peut se déplacer vers le haut ou vers le bas");
+				if(direction.equals("UP")) {
+					//System.out.println("^");
+					Thread t = new Thread(()->{
+						double startY = imgV.getLayoutY();
+		                double endY = startY - CASE - BORDS; // Distance à se déplacer (58.3 c'est la longueur de chaque casse + 13px des bords)
+		                double i = startY;
+	
+		                while (endY < i) {
+	
+		                    double pos = i; 
+	
+		                    Platform.runLater(() -> {
+		                        imgV.setLayoutY(pos);
+		                    });
+	
+		                    i -= 0.8; 
+	
+		                    try {
+		                        Thread.sleep(5); 
+		                    } catch (InterruptedException e) {
+		                        e.printStackTrace();
+		                    }
+		                }
+	
+		                Platform.runLater(() -> {
+		                	imgV.setLayoutY(endY);
+		                	this.linOrigine--;
+		                });
+	
+		            });
+						
 					
-				
-				t.start();
-			}
-			if(direction.equals("DOWN")) {
-				//System.out.println("v");
-				Thread t = new Thread(()->{
-					double startY = imgV.getLayoutY();
-	                double endY = startY + 58.3 + 13; // Distance à se déplacer (58.3 c'est la longueur de chaque casse + 13px des bords)
-	                double i = startY;
-
-	                while (i < endY) {
-
-	                    double pos = i; 
-
-	                    Platform.runLater(() -> {
-	                        imgV.setLayoutY(pos);
-	                    });
-
-	                    i += 0.8; 
-
-	                    try {
-	                        Thread.sleep(5); 
-	                    } catch (InterruptedException e) {
-	                        e.printStackTrace();
-	                    }
-	                }
-
-	                Platform.runLater(() -> imgV.setLayoutY(endY));
-
-	            });
+					t.start();
+				}
+				if(direction.equals("DOWN")) {
+					//System.out.println("v");
+					Thread t = new Thread(()->{
+						double startY = imgV.getLayoutY();
+		                double endY = startY + CASE + BORDS; // Distance à se déplacer (58.3 c'est la longueur de chaque casse + 13px des bords)
+		                double i = startY;
+	
+		                while (i < endY) {
+	
+		                    double pos = i; 
+	
+		                    Platform.runLater(() -> {
+		                        imgV.setLayoutY(pos);
+		                    });
+	
+		                    i += 0.8; 
+	
+		                    try {
+		                        Thread.sleep(5); 
+		                    } catch (InterruptedException e) {
+		                        e.printStackTrace();
+		                    }
+		                }
+	
+		                Platform.runLater(() -> {
+		                	imgV.setLayoutY(endY);
+		                	this.linOrigine++;
+		                });
+		            });
+						
 					
+					t.start();
+				}
 				
-				t.start();
 			}
-			
 		}
-
+		
 	}
 	
 	
@@ -378,7 +445,6 @@ public class Voiture implements Runnable{
 	public String toString() {
 		return "Couleur : "+this.couleur + " - Origine: ("+ this.colOrigine+","+this.linOrigine+") - Orientation : " + this.orientation + " - Type : "+this.typeVehicule;
 	}
-	
 	
 
 	public void start() {
