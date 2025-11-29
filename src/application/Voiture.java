@@ -273,8 +273,9 @@ public class Voiture implements Runnable{
 	// Si le point detecte une voiture, la méthode retourne vrai
 	public boolean detectionCollision(BoundingBox point, ArrayList<Voiture> lstVTR) {
 		boolean detection = false;
+		System.out.println(String.format("Le point à comparer est (%f,%f) ",point.getCenterX(),point.getCenterY()));
 		for(Voiture v : lstVTR) {
-			if(point.intersects(v.getBounds())&&!this.getBounds().intersects(point)) {
+			if((point.intersects(v.getBounds())&&!this.getBounds().intersects(point)) || ( point.getCenterX() < 40 || point.getCenterX() > 480 || point.getCenterY() < 60 || point.getCenterY() > 505 ) ) {
 				System.out.println(String.format("Voiture (%S) détectée ", v.getID()));
 				detection = true;
 			}
@@ -291,6 +292,7 @@ public class Voiture implements Runnable{
 	public synchronized void seDeplacer(String direction, ImageView imgV, ArrayList<Voiture> lstVTR) {
 		Point2D pointDirecteur = genererPointeur(direction,orientation);													//TODO: PLACER ICI LA FONCTION (PEUT-ÊTRE)
 		BoundingBox pointDansGrille = new BoundingBox(genererPointeur(direction,orientation).getX(),genererPointeur(direction,orientation).getY(),1,1);
+		
 		if(detectionCollision(pointDansGrille,lstVTR)) {
 			System.out.println("Semble marcher");
 		}else {

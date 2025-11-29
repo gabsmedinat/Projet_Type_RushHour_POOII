@@ -65,6 +65,8 @@ public class Main extends Application {
 	Image imgGrille;
 	ImageView grille;
 	
+	String dernierJeu = "";
+	
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -119,6 +121,7 @@ public class Main extends Application {
 		jeuFacile.setId("facile");
 		jeuFacile.setOnMouseClicked(event ->{
 			ImageView imgCliquee = (ImageView) event.getTarget();
+			dernierJeu = imgCliquee.getId();
 			System.out.println("Vous avez cliqué sur: "+imgCliquee.getId());
 			creerJeu(imgCliquee.getId());
 		});
@@ -210,8 +213,15 @@ public class Main extends Application {
 		btnReinit.setBorder(new Border(bdStroke));
 		btnReinit.setPadding(new Insets(5,15,5,15));
 		
+		/*
+		 * J'avais préalablement gargé en mémoire l'imageView du dernier jeu afin de pouvoir obtenir son ID, et faire un nouveau jeu avec
+		 * */
 		btnReinit.setOnMouseClicked(event ->{
 			temps.arreterChronometre();
+			creerMenuPrincipal();
+			configurerMenuPrincipal();
+			assemblerMenuPrincipal();
+			creerJeu(dernierJeu);
 		});
 		
 		btnMenu.setBorder(new Border(bdStroke));

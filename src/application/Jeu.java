@@ -28,7 +28,7 @@ public class Jeu {
 	Voiture voitureSelectionnee = null;
 	ArrayList<Voiture> lstVoitures = new ArrayList<Voiture>();
 	private boolean setSystemeCollisions = false;
-	private Point2D pointBut = new  Point2D(500,250);
+	private Point2D pointBut = new  Point2D(450,250);
 	
 	
 	/** 
@@ -151,15 +151,19 @@ public class Jeu {
 				imgV.requestFocus();
 				
 								
-				
+				/*
+				 * Lorsque touche appuyée, si la touche est une flèche directionnelle, la voiture se déplacera.
+				 * Aussi, si la voiture rouge atteint la sortie, affichage du gagnant. 
+				 */
 				imgV.setOnKeyPressed(e->{
 					String direction = e.getCode().toString();
 					vtr.seDeplacer(direction, imgV, lstVoitures);
-					if(vtr.getBounds().intersects(pointBut.getX(),pointBut.getY(),1,1)) {
+					if(vtr.getBounds().intersects(pointBut.getX(),pointBut.getY(),1,1)&&vtr.getCouleur().equals("rouge")&&direction.equals("RIGHT")) {
 						System.out.println("Voilà");
 						Alert joueurGagne = new Alert(AlertType.INFORMATION);
-						joueurGagne.setHeaderText("Vous avez gagné!");
-						joueurGagne.setContentText("Vous avez gagné ");
+						joueurGagne.setHeaderText("Vous avez gagné ");
+						joueurGagne.setTitle("Félicitations !");
+						joueurGagne.setGraphic(new ImageView(new Image(getClass().getResource("/images/award.gif").toString())));
 						joueurGagne.showAndWait();
 					}					
 				}); 
