@@ -25,9 +25,7 @@ public class Jeu {
 	private Integer nbrCoups;
 	private String JEUX = "Assets/donnees/";
 	private enum difficulté {facile, moyen, difficile};
-	Voiture voitureSelectionnee = null;
-	ArrayList<Voiture> lstVoitures = new ArrayList<Voiture>();
-	private boolean setSystemeCollisions = false;
+	private ArrayList<Voiture> lstVoitures = new ArrayList<Voiture>();
 	private Point2D pointBut = new  Point2D(450,250);
 	
 	
@@ -106,20 +104,83 @@ public class Jeu {
 			vtr.setID(ID.toString());
 			
 			/* Utilisation des dimensions de l'ImageView de l'objet Voiture. */
-//			vtr.setBounds(imgV.getBoundsInParent());   
 			panneau.getChildren().add(imgV);
 			vtr.setBounds(imgV);
-			System.out.println("Voiture : "+vtr.getID()+" - Bounds: "+ vtr.getBounds());
+//			System.out.println("Voiture : "+vtr.getID()+" - Bounds: "+ vtr.getBounds());
 						
+			
+			vtr.getImgV().setOnDragDetected(evnt -> {
+				imgV.setFocusTraversable(true);   
+				imgV.requestFocus();
+				
+					double posXInitial = vtr.getBounds().getCenterX();
+					double posYInitial = vtr.getBounds().getCenterY();
+					System.out.println(String.format("Début: (%f,%f)",posXInitial,posYInitial));
+					
+				vtr.getImgV().setOnMouseExited(e ->{
+					System.out.println("Souris sorti de la voiture. Faut donc calculer:");
+					double posXFinal = e.getX();
+					double posYFinal = e.getY();
+					System.out.println(String.format("Fin: (%f,%f)", posXFinal,posYFinal));
+					
+					/* Si orientation de la voiture est Horizontale, alors je vais comparer deltaX pour un déplacement Horizontale. 
+					 * Sinon, je copare deltaY pour déplacement Verticale.
+					 */
+					if(vtr.getOrientation().equals("H")) {
+						if(posXFinal - posXInitial > 0) { vtr.seDeplacer("RIGHT", imgV, lstVoitures); }else {vtr.seDeplacer("LEFT", imgV, lstVoitures);}
+					}else {
+						if(posYFinal - posYInitial > 0 ) { vtr.seDeplacer("DOWN", imgV, lstVoitures); }else {vtr.seDeplacer("UP", imgV, lstVoitures);}
+					}
+				});
+				
+				
+//					while(true) {
+//						System.out.println("Y: "+posYInitial);
+//						System.out.println ("X: "+posXInitial);
+//						/*
+//						 * Si on glisse la voiture plus de 3 CASES, le système interprete RIGHT(+) ou LEFT(-) selon la direction
+//						 */
+//						if(evnt.getX()-posXInitial > 3*CASE) {
+//							vtr.seDeplacer("RIGHT",vtr.getImgV(),lstVoitures);
+//						}
+//						 if(evnt.getX()-posXInitial < 3*CASE) {
+//							vtr.seDeplacer("LEFT",vtr.getImgV(),lstVoitures);
+//
+//						}
+//						 if(evnt.getY()-posYInitial < 3*CASE) {
+//							vtr.seDeplacer("UP",vtr.getImgV(),lstVoitures);
+//						}
+//						 if(evnt.getY()-posYInitial > 3*CASE) {
+//							vtr.seDeplacer("DOWN",vtr.getImgV(),lstVoitures);
+//
+//						}
+//						 if(!evnt.isPrimaryButtonDown()) {
+//							 estClique = false;
+//						 }
+//						imgV.setFocusTraversable(false);
+//					}
+					
+					
+//					if(evnt.getX() - posXInitial > 0) {
+//						System.out.println("RIGHT");
+//						vtr.seDeplacer("RIGHT",vtr.getImgV(),lstVoitures);
+//					}else {
+//						System.out.println("LEFT");
+//						
+//					}
+					
+//				});
+//				t.start();
+				imgV.setFocusTraversable(false);
+			});
 			
 			/* RequestFocus pour l'objet Voiture lorsque cliqué + animation courte */
 			imgV.setOnMouseClicked(event ->{
-				voitureSelectionnee = vtr;
 				imgV.requestFocus();
 				System.out.println("Vous avez selectionné "+vtr.getID()+" - Bounds: "+ vtr.getBounds());   // TODO Indicateur pour debug
 				
 				/*  Animation   */
-				Thread t = new Thread(()->{
+				Thread t2 = new Thread(()->{
 					Platform.runLater(()->{
 						imgV.setScaleX(1.1);
 						imgV.setScaleY(1.1);
@@ -140,7 +201,7 @@ public class Jeu {
 					});
 										
 				});
-				t.start();
+				t2.start();
 				
 				
 				/* Saisie de FocusTraversable à l'objet Voiture choisi et seulement à lui. Cela est fait 
@@ -148,9 +209,9 @@ public class Jeu {
 				 * Le résultat de ne pas faire cela serait donner la possibilité à plusieurs Voitures de se déplacer en même temps
 				 * avec la commande du clavier (condition de course ou "racing confition").*/
 				imgV.setFocusTraversable(true);   
-				imgV.requestFocus();
+//				imgV.requestFocus();
 				
-								
+					
 				/*
 				 * Lorsque touche appuyée, si la touche est une flèche directionnelle, la voiture se déplacera.
 				 * Aussi, si la voiture rouge atteint la sortie, affichage du gagnant. 

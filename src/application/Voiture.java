@@ -16,7 +16,7 @@ import javafx.geometry.Point2D;
  * @author Gabme
  */
 public class Voiture implements Runnable{
-	private Double CASE = 58.3;     // Dimensions de chaque case de la grille ( CASE * CASE) ~ environ
+	private double CASE = 58.3;     // Dimensions de chaque case de la grille ( CASE * CASE) ~ environ
 	private int BORDS = 13;
 	private String idVoiture;  
 	private String couleur;
@@ -278,11 +278,23 @@ public class Voiture implements Runnable{
 			if((point.intersects(v.getBounds())&&!this.getBounds().intersects(point)) || ( point.getCenterX() < 40 || point.getCenterX() > 480 || point.getCenterY() < 60 || point.getCenterY() > 505 ) ) {
 				System.out.println(String.format("Voiture (%S) détectée ", v.getID()));
 				detection = true;
+				break;                  
 			}
 		}
 		return detection;
 	}
 	
+	
+	
+	
+	public ImageView getImgV() {
+		return imgV_vtr;
+	}
+
+	public void setImgV(ImageView imgV_vtr) {
+		this.imgV_vtr = imgV_vtr;
+	}
+
 	/**
 	 * Méthode gestionnaire du mouvement horizontale et/ou verticale de l'objet Voiture dans la grille de jeu.
 	 * @param direction
@@ -290,11 +302,11 @@ public class Voiture implements Runnable{
 	 * @param lstVTR
 	 */
 	public synchronized void seDeplacer(String direction, ImageView imgV, ArrayList<Voiture> lstVTR) {
-		Point2D pointDirecteur = genererPointeur(direction,orientation);													//TODO: PLACER ICI LA FONCTION (PEUT-ÊTRE)
+//		Point2D pointDirecteur = genererPointeur(direction,orientation);													
 		BoundingBox pointDansGrille = new BoundingBox(genererPointeur(direction,orientation).getX(),genererPointeur(direction,orientation).getY(),1,1);
 		
 		if(detectionCollision(pointDansGrille,lstVTR)) {
-			System.out.println("Semble marcher");
+			System.out.println("Détection ");
 		}else {
 			if(this.orientation.equals("H")) {
 				// Code pour les voitures horizontales
@@ -447,6 +459,7 @@ public class Voiture implements Runnable{
 	public String toString() {
 		return "Couleur : "+this.couleur + " - Origine: ("+ this.colOrigine+","+this.linOrigine+") - Orientation : " + this.orientation + " - Type : "+this.typeVehicule;
 	}
+	
 	
 
 	public void start() {
