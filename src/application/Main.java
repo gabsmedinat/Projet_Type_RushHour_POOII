@@ -1,18 +1,14 @@
 package application;
 	
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
@@ -30,42 +26,42 @@ import javafx.scene.paint.Color;
 
 
 public class Main extends Application {
-	BorderPane root = new BorderPane();
-	Scene scene;
-	Stage stage;
-	Jeu game;
+	private BorderPane root = new BorderPane();
+	private Scene scene;
+	private Stage stage;
+	private Jeu game;
 	
 	// MENU PRINCIPAL
-	HBox hbox ;
-	Image imgTitre;
-	Image imgJeuFacile;
-	Image imgJeuMoyen ;
-	Image imgJeuDIfficile ;
-	BackgroundSize taille_image;
-	BackgroundImage image_fond;
-	ImageView logo;
-	ImageView jeuFacile;
-	ImageView jeuMoyen;
-	ImageView jeuDifficile;
+	private HBox hbox ;
+	private Image imgTitre;
+	private Image imgJeuFacile;
+	private Image imgJeuMoyen ;
+	private Image imgJeuDIfficile ;
+	private BackgroundSize taille_image;
+	private BackgroundImage image_fond;
+	private ImageView logo;
+	private ImageView jeuFacile;
+	private ImageView jeuMoyen;
+	private ImageView jeuDifficile;
 	
 	// JEU
-	HBox hBox2;
-	Image imgArrierePlan;
+	private HBox hBox2;
+	private Image imgArrierePlan;
 	
-	VBox vBoxGauche;
-	Chronometre temps;
-	Label lblTemps;
-	Label lblCoups;
-	Label btnReinit;
-	Label btnMenu;
+	private VBox vBoxGauche;
+	private Chronometre temps;
+	private Label lblTemps;
+	private Label lblCoups;
+	private Label btnReinit;
+	private Label btnMenu;
 	
 	
-	BorderPane grilleJeu;
-	Pane panneauJeu;
-	Image imgGrille;
-	ImageView grille;
+	private BorderPane grilleJeu;
+	private Pane panneauJeu;
+	private Image imgGrille;
+	private ImageView grille;
 	
-	String dernierJeu = "";
+	private String dernierJeu = "";
 	
 	
 	@Override
@@ -75,12 +71,9 @@ public class Main extends Application {
 			
 			scene = new Scene(root);
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-			
-
-			
+						
 			Image appIcon = new Image(getClass().getResource("/images/icone.png").toString());
 			stage.getIcons().add(appIcon);
-			
 			stage.setTitle("Projet: Rush Hours par Gabriel Medina");
 
 			creerMenuPrincipal();
@@ -97,6 +90,9 @@ public class Main extends Application {
 		}
 	}
 	
+	/**
+	 * Méthode de création du menu Pricipal. Faite pour mieux organiser le code et séparer le code destiné à creer le menu
+	 */
 	public void creerMenuPrincipal() {
 		hbox = new HBox(30);
 		imgTitre = new Image(getClass().getResource("/images/logo.gif").toString());
@@ -111,6 +107,11 @@ public class Main extends Application {
 		jeuDifficile = new ImageView(imgJeuDIfficile);
 	}
 	
+	
+	/**
+	 * Méthode de configuration du menu Pricipal. Faite pour mieux organiser le code et séparer le code destiné à définir le comportement du 
+	 * menu principal.
+	 */
 	public void configurerMenuPrincipal() {
 		root.setAlignment(logo, Pos.CENTER);
 		root.setMargin(logo, new Insets(50,0,0,0));
@@ -122,7 +123,7 @@ public class Main extends Application {
 		jeuFacile.setOnMouseClicked(event ->{
 			ImageView imgCliquee = (ImageView) event.getTarget();
 			dernierJeu = imgCliquee.getId();
-			System.out.println("Vous avez cliqué sur: "+imgCliquee.getId());
+//			System.out.println("Vous avez cliqué sur: "+imgCliquee.getId());
 			creerJeu(imgCliquee.getId());
 		});
 		
@@ -130,7 +131,8 @@ public class Main extends Application {
 		jeuMoyen.setId("moyen");
 		jeuMoyen.setOnMouseClicked(event ->{
 			ImageView imgCliquee = (ImageView) event.getTarget();
-			System.out.println("Vous avez cliqué sur: "+imgCliquee.getId());
+			dernierJeu = imgCliquee.getId();
+//			System.out.println("Vous avez cliqué sur: "+imgCliquee.getId());
 			creerJeu(imgCliquee.getId());
 		});
 		
@@ -139,14 +141,19 @@ public class Main extends Application {
 		jeuDifficile.setOnMouseClicked(event ->{
 			
 			ImageView imgCliquee = (ImageView) event.getTarget();
-			System.out.println("Vous avez cliqué sur: "+imgCliquee.getId());
-			System.out.println(imgCliquee.getTypeSelector());
+			dernierJeu = imgCliquee.getId();
+//			System.out.println("Vous avez cliqué sur: "+imgCliquee.getId());
+//			System.out.println(imgCliquee.getTypeSelector());
 			creerJeu(imgCliquee.getId());
 		});
 		
 		
 	}
 	
+	/** 
+	 * Méthode d'assemblage des composants graphiques du menu Pricipal. Faite pour mieux organiser le code et séparer le code destiné à 
+	 * armer le menu et ses composants.
+	 */
 	public void assemblerMenuPrincipal() {
 		root.setTop(logo);
 		hbox.getChildren().addAll(jeuFacile, jeuMoyen, jeuDifficile);
@@ -154,42 +161,43 @@ public class Main extends Application {
 		stage.setWidth(600);
 		stage.setHeight(400);
 		stage.centerOnScreen();
-
 	}
 	
 	
-	
+	/**
+	 * Méthode de création du jeu. Faite pour mieux organiser le code et séparer le code destiné à creer l'interface graphique du jeu
+	 * @param difficulte Difficulté parmi "facile","moyen" et "difficile"
+	 */
 	public void creerJeu(String difficulte) {
 		vBoxGauche = new VBox(20);
 		grilleJeu = new BorderPane();
+		hBox2 = new HBox(10);
 		
-		lblTemps = new Label("00:00");
+		
 		btnReinit = new Label("Réinitialiser");
 		btnMenu = new Label("Retour au menu");
-		
-		
-		hBox2 = new HBox(10);
-		hBox2.setBackground(Background.fill(Color.BLACK));
-		scene.setRoot(hBox2);
 
 		game = new Jeu(difficulte);
-		lblCoups = new Label(game.getCoups());
+
+		temps = new Chronometre();
+		lblTemps = new Label("00:00");
+		lblCoups = game.GenererCoups();																				// ******TODO
 		
 		imgGrille = new Image(getClass().getResource("/images/grille.gif").toString());
 		grille = new ImageView(imgGrille);
-		
 		panneauJeu = new Pane(grille);
 		
-		
-
-		configurerJeu();
-		
+		configurerJeu();  
 		}
 	
+	/** Lignes de code destinées à la configuration, mise en forme et le fonctionnement du jeu
+	 * 
+	 */
 	public void configurerJeu() {
 		imgArrierePlan = new Image(getClass().getResource("/images/jaunenoir.gif").toString());
 		BackgroundSize tailleBg = new BackgroundSize(1.0,1.0,true,true,false,false);
 		BackgroundImage imgArrPlan = new BackgroundImage(imgArrierePlan,BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.CENTER,tailleBg);
+		
 		hBox2.setBackground(new Background(imgArrPlan));
 		hBox2.setPadding(new Insets(10));
 		
@@ -201,14 +209,13 @@ public class Main extends Application {
 		
 		
 		BorderStroke bdStroke = new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID,new CornerRadii(5), new BorderWidths(2.0) );
-
 		
-		temps = new Chronometre();
 		temps.start();
 		lblTemps = (temps.getLabel());
 		
 		lblCoups.setBorder(new Border(bdStroke));
 		lblCoups.setPadding(new Insets(5,15,5,15));
+		
 
 		btnReinit.setBorder(new Border(bdStroke));
 		btnReinit.setPadding(new Insets(5,15,5,15));
@@ -227,8 +234,12 @@ public class Main extends Application {
 		btnMenu.setBorder(new Border(bdStroke));
 		btnMenu.setPadding(new Insets(5,15,5,15));
 		
+		
+		/**
+		 * Retour au menu principale
+		 */
 		btnMenu.setOnMouseClicked(event -> {
-			System.out.println("Type : "+event.getEventType());
+//			System.out.println("Type : "+event.getEventType());
 			temps.arreterChronometre();
 			scene.setRoot(root);
 			creerMenuPrincipal();
@@ -240,20 +251,20 @@ public class Main extends Application {
 		
 		
 		
-		// Tests
+		/**
+		 * Utilisé pour identifier les coordonnées d'un endroit cliqué dans la grille. À savoir: Détection exclusivement de la grille et non
+		 * pas des voitures ou autres elements en dehors.
+		 */
 		grille.setOnMouseClicked(event ->{
-			System.out.println("("+event.getX()+","+event.getY()+")");
+			System.out.println("Souris cliquée dans le point P("+event.getX()+","+event.getY()+")");
 		});
-		
-		
-
-		
-		
-		
 	}
 	
+	/** Méthode faite pour mieux organiser le code main, et séparer les lignes de code destinées à armer les composants du jeu
+	 * 
+	 */
 	public void assemblerJeu() {
-		
+		scene.setRoot(hBox2);                     // Changer le layout qui sera affiché sur scene. 
 		vBoxGauche.getChildren().addAll(lblTemps,lblCoups,btnReinit,btnMenu);
 		grilleJeu.setCenter(panneauJeu);
 		hBox2.getChildren().addAll(vBoxGauche, grilleJeu);

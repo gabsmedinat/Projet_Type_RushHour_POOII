@@ -16,14 +16,14 @@ import javafx.scene.paint.Color;
  * @author Gabme
  */
 public class Chronometre implements Runnable {
-	boolean chronometreActif = false;
-	String instant = "00:00";
-	Label chronometre = new Label(instant);
+	private boolean chronometreActif = false;
+	private String instant = "00:00";
+	private Label chronometre = new Label(instant);
 	
-	int secondes = 0;
-	int minutes = 0;
+	private int secondes = 0;
+	private int minutes = 0;
 
-	BorderStroke bdStroke;
+	private BorderStroke bdStroke;
 
 	/**
 	 * Exécution du programme en continu. Arrêt sécuritaire du thread à l'aide d'un booléen de contrôle et une bouble while.

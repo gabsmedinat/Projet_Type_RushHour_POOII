@@ -28,7 +28,21 @@ public class Voiture implements Runnable{
 	private Image imgVoiture;
 	private ImageView imgV_vtr;
 	private Bounds dimensions;   					// Limites du perimètre de l'objet pour le système de collisions
+	private boolean estGlisse = false;
+	private boolean enMouvement = false;
 	
+	public boolean isEstGlisse() {
+		return estGlisse;
+	}
+
+	public void setEstGlisse(boolean estGlisse) {
+		this.estGlisse = estGlisse;
+	}
+	
+	public void setMouvement(boolean bool) {
+		enMouvement = bool;
+	}
+
 	/**
 	 * Constructeur de classe Voiture.
 	 * @param couleur Couleur de la voiture.
@@ -55,7 +69,6 @@ public class Voiture implements Runnable{
 			alerte.showAndWait();
 		}
 		this.imgVoiture = new Image(getClass().getResource("/images/"+this.typeVehicule+"_"+this.orientation+"_"+this.couleur+".gif").toString());
-		
 	}
 	
 	/**
@@ -231,37 +244,40 @@ public class Voiture implements Runnable{
 		return coordonneeX;
 	}
 	
-	//Pointeur: Il trace un point dynamique durant le deplacement du véhicule. Une fois en arrêt, le pointeur sera effacé.
-	// Fonctionnement: La variable pointDirecteur obtiendra ses coordonnées à l'aide de l'Orientation + la direction du mouvement. 
-	// Alors, une fois le deplacement commence, un point sera tracé à ~15px en dehors et en direction du déplacement, et: Si le point n'intersecte
-	// aucune voiture, ca veut dire qu'il peut se déplacer à cette case. Sinon, mouvement interdit.
+	/**Pointeur: Il trace un point dynamique durant le deplacement du véhicule. Une fois en arrêt, le pointeur sera effacé.
+	 Fonctionnement: La variable pointDirecteur obtiendra ses coordonnées à l'aide de l'Orientation + la direction du mouvement. 
+	 Alors, une fois le deplacement commence, un point sera tracé à ~15px en dehors et en direction du déplacement, et: Si le point n'intersecte
+	 aucune voiture, ca veut dire qu'il peut se déplacer à cette case. Sinon, mouvement interdit.
+	 @param direction Direction du déplacement
+	 @paran orientation Orientation de la voiture (Horizontale ou Verticale)
+	 **/
 	public Point2D genererPointeur(String direction, String orientation) {
 		if(orientation.equals("V")) {
 			if(direction.equals("UP")) {
 				Point2D pointDirecteur = new Point2D(this.getX()+(CASE/2),this.getY()-(CASE/2));
-				System.out.println(String.format("Point généré à (%S,%S)",pointDirecteur.getX(),pointDirecteur.getY()));
+//				System.out.println(String.format("Point généré à (%S,%S)",pointDirecteur.getX(),pointDirecteur.getY()));
 				return  pointDirecteur;
 			}
 			else if(direction.equals("DOWN")) {
 				Point2D pointDirecteur = new Point2D(this.getX()+(CASE/2),this.getY()+(taille+0.5)*CASE+(taille*BORDS));
-				System.out.println(String.format("Point généré à (%S,%S)",pointDirecteur.getX(),pointDirecteur.getY()));
+//				System.out.println(String.format("Point généré à (%S,%S)",pointDirecteur.getX(),pointDirecteur.getY()));
 				return  pointDirecteur;
 			}
 			else {
-				System.out.println("orientation V ...pourtant nous sommes dans l'else");
+//				System.out.println("orientation V ...pourtant nous sommes dans l'else");
 				return new Point2D(0,0);
 			}
 		}else if(orientation.equals("H")) {
 			if(direction.equals("LEFT")) {
 				Point2D pointDirecteur = new Point2D(this.getX()-(CASE/2),this.getY()+(CASE/2));
-				System.out.println(String.format("Point généré à (%S,%S)",pointDirecteur.getX(),pointDirecteur.getY()));
+//				System.out.println(String.format("Point généré à (%S,%S)",pointDirecteur.getX(),pointDirecteur.getY()));
 				return  pointDirecteur;
 			}else if (direction.equals("RIGHT")) {
 				Point2D pointDirecteur = new Point2D(this.getX()+(taille+0.5)*CASE+(taille*BORDS),this.getY()+(CASE/2));
-				System.out.println(String.format("Point généré à (%S,%S)",pointDirecteur.getX(),pointDirecteur.getY()));
+//				System.out.println(String.format("Point généré à (%S,%S)",pointDirecteur.getX(),pointDirecteur.getY()));
 				return  pointDirecteur;
 			}else {
-				System.out.println("orientation H ...pourtant nous sommes dans l'else");
+//				System.out.println("orientation H ...pourtant nous sommes dans l'else");
 				return new Point2D (0,0);
 			}
 		}else {
@@ -273,10 +289,10 @@ public class Voiture implements Runnable{
 	// Si le point detecte une voiture, la méthode retourne vrai
 	public boolean detectionCollision(BoundingBox point, ArrayList<Voiture> lstVTR) {
 		boolean detection = false;
-		System.out.println(String.format("Le point à comparer est (%f,%f) ",point.getCenterX(),point.getCenterY()));
+//		System.out.println(String.format("Le point à comparer est (%f,%f) ",point.getCenterX(),point.getCenterY()));
 		for(Voiture v : lstVTR) {
 			if((point.intersects(v.getBounds())&&!this.getBounds().intersects(point)) || ( point.getCenterX() < 40 || point.getCenterX() > 480 || point.getCenterY() < 60 || point.getCenterY() > 505 ) ) {
-				System.out.println(String.format("Voiture (%S) détectée ", v.getID()));
+//				System.out.println(String.format("Voiture (%S) détectée ", v.getID()));
 				detection = true;
 				break;                  
 			}
@@ -301,21 +317,25 @@ public class Voiture implements Runnable{
 	 * @param imgV
 	 * @param lstVTR
 	 */
-	public synchronized void seDeplacer(String direction, ImageView imgV, ArrayList<Voiture> lstVTR) {
-//		Point2D pointDirecteur = genererPointeur(direction,orientation);													
+	public synchronized void seDeplacer(String direction, ImageView imgV, ArrayList<Voiture> lstVTR, Jeu jeu) {
+		
+		if(enMouvement) {
+			return;
+		}
+		setMouvement(true);
+		
 		BoundingBox pointDansGrille = new BoundingBox(genererPointeur(direction,orientation).getX(),genererPointeur(direction,orientation).getY(),1,1);
 		
 		if(detectionCollision(pointDansGrille,lstVTR)) {
-			System.out.println("Détection ");
+        	setMouvement(false);
+			return;
 		}else {
 			if(this.orientation.equals("H")) {
 				// Code pour les voitures horizontales
-				//System.out.println("Votre voiture peut se déplacer vers la droite ou vers la gauche");
 				if(direction.equals("RIGHT")) {
-					//System.out.println("->");
 					Thread t = new Thread(()->{
 						double startX = imgV.getLayoutX();
-		                double endX = startX + CASE + BORDS; // Distance à se déplacer (**58.3 c'est la longueur de chaque casse + 13px des bords)
+		                double endX = startX + CASE + BORDS; 
 		                double i = startX;
 	
 		                while (i < endX) {
@@ -334,12 +354,11 @@ public class Voiture implements Runnable{
 	
 		                Platform.runLater(() ->{
 		                	imgV.setLayoutX(endX);
+	                        jeu.ajouterCoup();
 	                        this.colOrigine++;
-					});
-	
+	                        setMouvement(false);
+		                });
 		            });
-						
-					
 					t.start();
 				}
 				if(direction.equals("LEFT")) {
@@ -349,13 +368,10 @@ public class Voiture implements Runnable{
 		                double i = startX;
 	
 		                while (endX < i) {
-	
 		                    double pos = i; 
-	
 		                    Platform.runLater(() -> {
 		                        imgV.setLayoutX(pos);
 		                    });
-	
 		                    i -= 0.8; 
 	
 		                    try {
@@ -367,28 +383,22 @@ public class Voiture implements Runnable{
 	
 		                Platform.runLater(() ->{
 		                	imgV.setLayoutX(endX);
+	                        jeu.ajouterCoup();
 		                	this.colOrigine--;
+		                	setMouvement(false);
 		                });
-	
 		            });
-						
-					
 					t.start();
 				}
-			}else { // SI Orientation Verticale
-				// Code pour les voitures Verticales 
-				//System.out.println("Votre voiture peut se déplacer vers le haut ou vers le bas");
+			}else { 
 				if(direction.equals("UP")) {
-					//System.out.println("^");
 					Thread t = new Thread(()->{
 						double startY = imgV.getLayoutY();
-		                double endY = startY - CASE - BORDS; // Distance à se déplacer (58.3 c'est la longueur de chaque casse + 13px des bords)
+		                double endY = startY - CASE - BORDS; 
 		                double i = startY;
-	
+		                
 		                while (endY < i) {
-	
 		                    double pos = i; 
-	
 		                    Platform.runLater(() -> {
 		                        imgV.setLayoutY(pos);
 		                    });
@@ -404,23 +414,21 @@ public class Voiture implements Runnable{
 	
 		                Platform.runLater(() -> {
 		                	imgV.setLayoutY(endY);
+	                        jeu.ajouterCoup();
 		                	this.linOrigine--;
+		                	setMouvement(false);
 		                });
 	
 		            });
-						
-					
 					t.start();
 				}
 				if(direction.equals("DOWN")) {
-					//System.out.println("v");
 					Thread t = new Thread(()->{
 						double startY = imgV.getLayoutY();
 		                double endY = startY + CASE + BORDS; // Distance à se déplacer (58.3 c'est la longueur de chaque casse + 13px des bords)
 		                double i = startY;
 	
 		                while (i < endY) {
-	
 		                    double pos = i; 
 	
 		                    Platform.runLater(() -> {
@@ -438,17 +446,15 @@ public class Voiture implements Runnable{
 	
 		                Platform.runLater(() -> {
 		                	imgV.setLayoutY(endY);
+	                        jeu.ajouterCoup();
 		                	this.linOrigine++;
+		                	setMouvement(false);
 		                });
 		            });
-						
-					
 					t.start();
 				}
-				
 			}
 		}
-		
 	}
 	
 	
@@ -459,8 +465,6 @@ public class Voiture implements Runnable{
 	public String toString() {
 		return "Couleur : "+this.couleur + " - Origine: ("+ this.colOrigine+","+this.linOrigine+") - Orientation : " + this.orientation + " - Type : "+this.typeVehicule;
 	}
-	
-	
 
 	public void start() {
 	}

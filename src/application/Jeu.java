@@ -11,6 +11,7 @@ import javafx.geometry.BoundingBox;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -27,7 +28,7 @@ public class Jeu {
 	private enum difficulté {facile, moyen, difficile};
 	private ArrayList<Voiture> lstVoitures = new ArrayList<Voiture>();
 	private Point2D pointBut = new  Point2D(450,250);
-	
+	private Label lblCoups;
 	
 	/** 
 	 * Constructeur de classe Jeu. Une fois que la difficulté de Jeu est choisie, le constructeur s'occupe de chercher les fichiers 
@@ -63,22 +64,25 @@ public class Jeu {
 		}
 	}
 	
-	
-	/**
-	 * Retour du nombre de deplacements faits dans le jeu.
-	 * @return nbrCoups
+	/** 
+	 * Méthode qui augmente le nombre de coups effectués dans le jeu.
 	 */
-	public String getCoups() {
-		return this.nbrCoups.toString();
+	public void ajouterCoup() {
+		Platform.runLater(()->{
+			nbrCoups++;
+			lblCoups.setText(nbrCoups.toString());
+		});
 	}
 	
 	/**
-	 * 
-	 * @param coup le numéro de deplacements
+	 * Méthode qui retourne une étiquette créé avec la valeur de la variable "nbrCoups" initialisée à zero.
+	 * @return
 	 */
-	public void setCoups(Integer coup) {
-		nbrCoups = coup;
+	public Label GenererCoups() {
+		lblCoups = new Label(this.nbrCoups.toString());
+		return lblCoups;
 	}
+	
 	
 	/**
 	 * Méthode qui arme la partie visuelle de la voiture pour la placer dans la grille.
@@ -108,78 +112,61 @@ public class Jeu {
 			vtr.setBounds(imgV);
 //			System.out.println("Voiture : "+vtr.getID()+" - Bounds: "+ vtr.getBounds());
 						
-			
+			/* Première option de déplacement: Glisser/Déplacer 
+			 * Le déplacement dépend de deux évènements: En premier, la détection du evenement glisser avec le bouton appuyé.
+			 * En deuxième, la détection du souris lorsqu'il sort de l'aire de la voiture
+			 */
 			vtr.getImgV().setOnDragDetected(evnt -> {
+				vtr.setEstGlisse(true);
 				imgV.setFocusTraversable(true);   
 				imgV.requestFocus();
-				
-					double posXInitial = vtr.getBounds().getCenterX();
-					double posYInitial = vtr.getBounds().getCenterY();
-					System.out.println(String.format("Début: (%f,%f)",posXInitial,posYInitial));
+				double posXInitial = evnt.getX();
+				double posYInitial = evnt.getX();
+//				System.out.println(String.format("Début: (%f,%f)",posXInitial,posYInitial));
 					
 				vtr.getImgV().setOnMouseExited(e ->{
-					System.out.println("Souris sorti de la voiture. Faut donc calculer:");
+//					System.out.println("Souris sorti de la voiture. Faut donc calculer:");
 					double posXFinal = e.getX();
 					double posYFinal = e.getY();
-					System.out.println(String.format("Fin: (%f,%f)", posXFinal,posYFinal));
+//					System.out.println(String.format("Fin: (%f,%f)", posXFinal,posYFinal));
 					
 					/* Si orientation de la voiture est Horizontale, alors je vais comparer deltaX pour un déplacement Horizontale. 
-					 * Sinon, je copare deltaY pour déplacement Verticale.
+					 * Sinon, je compare deltaY pour déplacement Verticale.
 					 */
-					if(vtr.getOrientation().equals("H")) {
-						if(posXFinal - posXInitial > 0) { vtr.seDeplacer("RIGHT", imgV, lstVoitures); }else {vtr.seDeplacer("LEFT", imgV, lstVoitures);}
-					}else {
-						if(posYFinal - posYInitial > 0 ) { vtr.seDeplacer("DOWN", imgV, lstVoitures); }else {vtr.seDeplacer("UP", imgV, lstVoitures);}
+					if(vtr.getOrientation().equals("H") && vtr.isEstGlisse()) {
+						if(posXFinal - posXInitial > 0) {
+							vtr.seDeplacer("RIGHT", imgV, lstVoitures, this); 
+							if(vtr.getBounds().intersects(pointBut.getX(),pointBut.getY(),1,1)&&vtr.getCouleur().equals("rouge")) {
+								Alert joueurGagne = new Alert(AlertType.INFORMATION);
+								joueurGagne.setHeaderText("Vous avez gagné ");
+								joueurGagne.setTitle("Félicitations !");
+								joueurGagne.setGraphic(new ImageView(new Image(getClass().getResource("/images/award.gif").toString())));
+								joueurGagne.showAndWait();
+							}
+						}else {
+							vtr.seDeplacer("LEFT", imgV, lstVoitures, this);
+						}
+						
 					}
+					if(vtr.getOrientation().equals("V") && vtr.isEstGlisse()){
+						if(posYFinal - posYInitial > 0 ) { 
+							vtr.seDeplacer("DOWN", imgV, lstVoitures, this);
+						}else {
+							vtr.seDeplacer("UP", imgV, lstVoitures, this);
+						}
+					}
+					imgV.setFocusTraversable(false);
+					vtr.setEstGlisse(false);
+					e.consume();
 				});
-				
-				
-//					while(true) {
-//						System.out.println("Y: "+posYInitial);
-//						System.out.println ("X: "+posXInitial);
-//						/*
-//						 * Si on glisse la voiture plus de 3 CASES, le système interprete RIGHT(+) ou LEFT(-) selon la direction
-//						 */
-//						if(evnt.getX()-posXInitial > 3*CASE) {
-//							vtr.seDeplacer("RIGHT",vtr.getImgV(),lstVoitures);
-//						}
-//						 if(evnt.getX()-posXInitial < 3*CASE) {
-//							vtr.seDeplacer("LEFT",vtr.getImgV(),lstVoitures);
-//
-//						}
-//						 if(evnt.getY()-posYInitial < 3*CASE) {
-//							vtr.seDeplacer("UP",vtr.getImgV(),lstVoitures);
-//						}
-//						 if(evnt.getY()-posYInitial > 3*CASE) {
-//							vtr.seDeplacer("DOWN",vtr.getImgV(),lstVoitures);
-//
-//						}
-//						 if(!evnt.isPrimaryButtonDown()) {
-//							 estClique = false;
-//						 }
-//						imgV.setFocusTraversable(false);
-//					}
-					
-					
-//					if(evnt.getX() - posXInitial > 0) {
-//						System.out.println("RIGHT");
-//						vtr.seDeplacer("RIGHT",vtr.getImgV(),lstVoitures);
-//					}else {
-//						System.out.println("LEFT");
-//						
-//					}
-					
-//				});
-//				t.start();
+				evnt.consume();
 				imgV.setFocusTraversable(false);
 			});
 			
-			/* RequestFocus pour l'objet Voiture lorsque cliqué + animation courte */
+			/** RequestFocus pour l'objet Voiture lorsque la voiture est cliquée. Aussi, une animation courte a lieu lors du clic.*/
 			imgV.setOnMouseClicked(event ->{
 				imgV.requestFocus();
-				System.out.println("Vous avez selectionné "+vtr.getID()+" - Bounds: "+ vtr.getBounds());   // TODO Indicateur pour debug
 				
-				/*  Animation   */
 				Thread t2 = new Thread(()->{
 					Platform.runLater(()->{
 						imgV.setScaleX(1.1);
@@ -209,18 +196,17 @@ public class Jeu {
 				 * Le résultat de ne pas faire cela serait donner la possibilité à plusieurs Voitures de se déplacer en même temps
 				 * avec la commande du clavier (condition de course ou "racing confition").*/
 				imgV.setFocusTraversable(true);   
-//				imgV.requestFocus();
-				
+			
 					
-				/*
-				 * Lorsque touche appuyée, si la touche est une flèche directionnelle, la voiture se déplacera.
-				 * Aussi, si la voiture rouge atteint la sortie, affichage du gagnant. 
+				/**
+				 * Lorsqu'une touche est appuyée, si la touche est une flèche directionnelle, la voiture se déplacera.
+				 * Aussi, si la voiture rouge atteint la sortie, un message de félicitations sera affiché sous forme d'alerte.
 				 */
 				imgV.setOnKeyPressed(e->{
 					String direction = e.getCode().toString();
-					vtr.seDeplacer(direction, imgV, lstVoitures);
+					vtr.seDeplacer(direction, imgV, lstVoitures, this);
+									
 					if(vtr.getBounds().intersects(pointBut.getX(),pointBut.getY(),1,1)&&vtr.getCouleur().equals("rouge")&&direction.equals("RIGHT")) {
-						System.out.println("Voilà");
 						Alert joueurGagne = new Alert(AlertType.INFORMATION);
 						joueurGagne.setHeaderText("Vous avez gagné ");
 						joueurGagne.setTitle("Félicitations !");
@@ -231,9 +217,7 @@ public class Jeu {
 				
 				/* Une fois l'action accomplie, FocusTraversable devient False pour limiter la mouvement à un seul Objet Voiture à la fois */
 				imgV.setFocusTraversable(false);
-				
 			});
-			
 		}
 	}
 	
