@@ -24,7 +24,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
-
+/**Classe qui gère la mise en scène, l'ajout des composants de la classe Voiture, la classe Chronometre et la classe Jeu ainsi que les 
+ * affichages du Menu et du Jeu.  */
 public class Main extends Application {
 	private BorderPane root = new BorderPane();
 	private Scene scene;

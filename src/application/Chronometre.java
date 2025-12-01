@@ -16,14 +16,19 @@ import javafx.scene.paint.Color;
  * @author Gabme
  */
 public class Chronometre implements Runnable {
+	/**Booléen contrôleur de l'état de l'objet Chronomètre*/
 	private boolean chronometreActif = false;
+	/**Affichage du temps écoulé entre le début du jeu avec l'instant de l'affichage.*/
 	private String instant = "00:00";
+	/**Etiquette contenant les valeurs d'affichage.*/
 	private Label chronometre = new Label(instant);
-	
+	/**Compteur de secondes écoulées.*/
 	private int secondes = 0;
+	/**Compteur de minutes écoulées.*/
 	private int minutes = 0;
-
+	/**Bords de l'affichage du chronomètre.*/
 	private BorderStroke bdStroke;
+
 
 	/**
 	 * Exécution du programme en continu. Arrêt sécuritaire du thread à l'aide d'un booléen de contrôle et une bouble while.

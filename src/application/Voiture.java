@@ -1,7 +1,6 @@
 package application;
 
 import java.util.ArrayList;
-
 import javafx.application.Platform;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
@@ -16,21 +15,39 @@ import javafx.geometry.Point2D;
  * @author Gabme
  */
 public class Voiture implements Runnable{
-	private double CASE = 58.3;     // Dimensions de chaque case de la grille ( CASE * CASE) ~ environ
+	/**Constante contenant la longueur en pixels de chaque côté d'une case de la grille.*/
+	private double CASE = 58.3;     
+	/**Constante contenant la longeur en pixels des bords entre deux cases. */
 	private int BORDS = 13;
+	/**Chaque objet Voiture obtient un Identifiant Unique pour être identifié. */
 	private String idVoiture;  
+	/**Couleur de l'image de l'objet Voiture. */
 	private String couleur;
+	/**Orientation de l'image de l'objet Voiture. */
 	private String orientation;
+	/**Nombre de cases occupées par l'objet Voiture.*/
 	private int taille;
+	/**Numéro de colonne où l'origine de l'objet Voiture est placé*/
 	private int colOrigine;
+	/**Numéro de ligne où l'origine de l'objet Voiture est placé*/
 	private int linOrigine;
+	/**Type de Voiture entre "Camion" ou "Voiture".*/
 	private String typeVehicule;
+	/**Image représentatnt l'objet Voiture.*/
 	private Image imgVoiture;
+	/**ImageView contenant l'image représentant l'objet Voiture.*/
 	private ImageView imgV_vtr;
-	private Bounds dimensions;   					// Limites du perimètre de l'objet pour le système de collisions
+	/**Espace occupé par l'objet Voiture.*/
+	private Bounds dimensions;   					
+	/**Booléen contrôleur de l'état de la voiture. Utilisé ensemble avec l'évènement onMouseExited pour définir la direction du déplacement.*/
 	private boolean estGlisse = false;
+	/**Booléen contrôleur de l'état de la voiture. Utilisé ensemble avec l'évènement onKeyPressed pour définir la direction du déplacement.*/
 	private boolean enMouvement = false;
 	
+	/**
+	 * Getter de variable booléene @param estGlisse
+	 * @return
+	 */
 	public boolean isEstGlisse() {
 		return estGlisse;
 	}

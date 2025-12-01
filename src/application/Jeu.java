@@ -23,11 +23,15 @@ import javafx.scene.layout.Pane;
  */
 
 public class Jeu {
+	/**Nombre de déplacements effectués dans le jeu.*/
 	private Integer nbrCoups;
+	/**Constante contenant le chemin aux fichiers du jeu.*/
 	private String JEUX = "Assets/donnees/";
-	private enum difficulté {facile, moyen, difficile};
+	/**Liste des objets Voitures instanciés au début d'un jeu.*/
 	private ArrayList<Voiture> lstVoitures = new ArrayList<Voiture>();
+	/**Coordonnées du point de sortie. */
 	private Point2D pointBut = new  Point2D(450,250);
+	/**Étiquette, encore vide, qui recoit les valeurs de l'étiquette "chronometre" de la classe Chronometre.*/
 	private Label lblCoups;
 	
 	/** 
