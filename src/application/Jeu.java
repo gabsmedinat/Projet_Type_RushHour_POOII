@@ -34,13 +34,16 @@ public class Jeu {
 	/**Étiquette, encore vide, qui recoit les valeurs de l'étiquette "chronometre" de la classe Chronometre.*/
 	private Label lblCoups;
 	
+	private Chronometre tempsJeu;
+	
 	/** 
 	 * Constructeur de classe Jeu. Une fois que la difficulté de Jeu est choisie, le constructeur s'occupe de chercher les fichiers 
 	 * correspondants, il initialise le nombre de placements faits à zero, et il créé des instances d'objet Voiture qui sont ensuite 
 	 * ajoutées à une collection de voitures.
 	 * @param Difficulté La difficulté du jeu selon trois types  */
-	public Jeu(String difficulte) {
+	public Jeu(String difficulte, Chronometre temps) {
 		nbrCoups = 0;
+		this.tempsJeu = temps;
 		
 		/* Lecture du fichier */
 		try {
@@ -143,6 +146,7 @@ public class Jeu {
 							if(vtr.getBounds().intersects(pointBut.getX(),pointBut.getY(),1,1)&&vtr.getCouleur().equals("rouge")) {
 								Alert joueurGagne = new Alert(AlertType.INFORMATION);
 								joueurGagne.setHeaderText("Vous avez gagné ");
+								tempsJeu.arreterChronometre();
 								joueurGagne.setTitle("Félicitations !");
 								joueurGagne.setGraphic(new ImageView(new Image(getClass().getResource("/images/award.gif").toString())));
 								joueurGagne.showAndWait();
@@ -214,6 +218,7 @@ public class Jeu {
 						Alert joueurGagne = new Alert(AlertType.INFORMATION);
 						joueurGagne.setHeaderText("Vous avez gagné ");
 						joueurGagne.setTitle("Félicitations !");
+						tempsJeu.arreterChronometre();
 						joueurGagne.setGraphic(new ImageView(new Image(getClass().getResource("/images/award.gif").toString())));
 						joueurGagne.showAndWait();
 					}					

@@ -178,9 +178,9 @@ public class Main extends Application {
 		btnReinit = new Label("Réinitialiser");
 		btnMenu = new Label("Retour au menu");
 
-		game = new Jeu(difficulte);
-
 		temps = new Chronometre();
+		game = new Jeu(difficulte, temps);
+
 		lblTemps = new Label("00:00");
 		lblCoups = game.GenererCoups();																				// ******TODO
 		
